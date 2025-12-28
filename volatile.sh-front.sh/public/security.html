@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Security - volatile.sh</title>
+    <meta
+      name="description"
+      content="Security technical details of volatile.sh - encryption, architecture, audit."
+    />
+    <meta name="robots" content="index,follow" />
+    <meta name="theme-color" content="#050505" />
+    <link rel="canonical" href="https://volatile.sh/security.html" />
+    <style>
+      :root {
+        --bg: #050505;
+        --fg: #33ff00;
+        --dim: #1a8000;
+        --dimmer: #0c3d00;
+        --red: #ef4444;
+        --blue: #3b82f6;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 1.5rem;
+        background: var(--bg);
+        color: var(--fg);
+        font-family:
+          ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        line-height: 1.6;
+      }
+      .container {
+        max-width: 900px;
+        margin: 0 auto;
+      }
+      header {
+        margin-bottom: 2rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid var(--dimmer);
+      }
+      h1 {
+        font-size: 1.8rem;
+        margin: 0 0 0.5rem 0;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+      }
+      .tagline {
+        font-size: 0.85rem;
+        opacity: 0.7;
+      }
+      h2 {
+        font-size: 1.2rem;
+        margin: 2.5rem 0 1rem 0;
+        padding-bottom: 0.25rem;
+        border-bottom: 1px solid var(--dimmer);
+      }
+      h3 {
+        font-size: 1rem;
+        margin: 1.5rem 0 0.5rem 0;
+      }
+      p,
+      li {
+        opacity: 0.9;
+        font-size: 0.93rem;
+      }
+      a {
+        color: var(--dim);
+        text-decoration: none;
+      }
+      a:hover {
+        color: var(--fg);
+        text-decoration: underline;
+      }
+      .muted {
+        color: var(--dim);
+      }
+      code {
+        color: var(--fg);
+        background: var(--dimmer);
+        padding: 0.15rem 0.4rem;
+        font-size: 0.9em;
+      }
+      pre {
+        background: var(--dimmer);
+        padding: 1rem;
+        overflow-x: auto;
+        border-left: 3px solid var(--fg);
+      }
+      pre code {
+        background: none;
+        padding: 0;
+      }
+      .check {
+        color: var(--fg);
+      }
+      .check::before {
+        content: "[✓] ";
+      }
+      .nav {
+        text-align: center;
+        margin-bottom: 2rem;
+        font-size: 0.85rem;
+      }
+      .nav a {
+        margin: 0 0.5rem;
+        opacity: 0.7;
+      }
+      .nav a:hover {
+        opacity: 1;
+      }
+      .diagram {
+        background: var(--dimmer);
+        padding: 1.5rem;
+        margin: 1rem 0;
+        font-family: monospace;
+        white-space: pre;
+        overflow-x: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="nav">
+        <a href="/">[ HOME ]</a>
+        <a href="/faq.html">[ FAQ ]</a>
+        <a href="/docs.html">[ DOCS ]</a>
+        <a href="/privacy.html">[ PRIVACY ]</a>
+        <a href="/terms.html">[ TERMS ]</a>
+      </div>
+
+      <header>
+        <h1>&gt; SECURITY_WHITEPAPER</h1>
+        <p class="tagline">Technical security analysis of volatile.sh</p>
+      </header>
+
+      <h2>Executive Summary</h2>
+      <p>
+        volatile.sh is a zero-knowledge, burn-after-reading secret sharing
+        service. The security model ensures that secrets are encrypted
+        client-side before transmission, and the server never has access to
+        decryption keys. This architecture makes it technically impossible for
+        the service operator to read user secrets.
+      </p>
+
+      <h2>Threat Model</h2>
+      <p><strong>We protect against:</strong></p>
+      <ul>
+        <li class="check">Server operator reading secrets</li>
+        <li class="check">Database breaches revealing plaintext</li>
+        <li class="check">Network interception of secrets in transit</li>
+        <li class="check">
+          Lawful or unlawful compelled disclosure of user data
+        </li>
+        <li class="check">Long-term data retention (secrets auto-delete)</li>
+      </ul>
+
+      <p><strong>We do NOT protect against:</strong></p>
+      <ul>
+        <li>Link recipients sharing the link with others</li>
+        <li>Malware on the sender's or recipient's device</li>
+        <li>Browser extensions capturing content</li>
+        <li>Phishing attacks tricking users into sharing links</li>
+      </ul>
+
+      <h2>Encryption Specification</h2>
+      <table>
+        <tr>
+          <th>Parameter</th>
+          <th>Value</th>
+        </tr>
+        <tr>
+          <td>Algorithm</td>
+          <td>AES-GCM (Advanced Encryption Standard - Galois/Counter Mode)</td>
+        </tr>
+        <tr>
+          <td>Key Size</td>
+          <td>256 bits</td>
+        </tr>
+        <tr>
+          <td>IV Size</td>
+          <td>96 bits (12 bytes)</td>
+        </tr>
+        <tr>
+          <td>Key Generation</td>
+          <td>cryptographically secure random (Web Crypto API)</td>
+        </tr>
+        <tr>
+          <td>Key Storage</td>
+          <td>URL fragment only (never sent to server)</td>
+        </tr>
+      </table>
+
+      <h2>Architecture Overview</h2>
+      <div class="diagram">
+        ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐ │ SENDER │ │
+        SERVER │ │ RECIPIENT │ │ (Browser) │ │ (Cloudflare) │ │ (Browser) │
+        └────────┬────────┘ └────────┬────────┘ └────────┬────────┘ │ │ │ │ 1.
+        Generate key │ │ │ (AES-256-GCM) │ │ │ │ │ │ 2. Encrypt locally │ │ │
+        (plaintext → ciphertext)│ │ │ │ │ │ 3. Send ciphertext ────────┼───→
+        Store encrypted ──────┼───┐ │ + IV only │ (no key!) │ │ │ │ │ │ │ 4.
+        Embed key in URL │ │ │ │ fragment (#key) │ │ │ │ │ │ │ │
+        ─────────────────────────────────────────────────────────│ │ │ │ │ │ │ │
+        5. Request secret │◄─┘ │ │ (by ID) │ │ │ │ │ │ 6. Return ciphertext │ │
+        │ + DELETE from DB │ │ │ │ │ │ │ 7. Decrypt locally │ │ │ (key from
+        fragment) │ │ │
+        └───────────────────────────┴───────────────────────────┘
+      </div>
+
+      <h2>Zero-Knowledge Guarantee</h2>
+      <p>
+        The zero-knowledge property is achieved through URL fragment isolation.
+        Per RFC 3986, the fragment component of a URL (the part after
+        <code>#</code>) is <strong>never sent to the server</strong> in HTTP
+        requests. This is a fundamental property of the web architecture.
+      </p>
+      <p>By placing the decryption key in the fragment, we ensure:</p>
+      <ul>
+        <li>The key never appears in server logs</li>
+        <li>The key never traverses the network</li>
+        <li>The server cannot decrypt stored ciphertext</li>
+        <li>Compromised server credentials expose no user data</li>
+      </ul>
+
+      <h2>Data Lifecycle</h2>
+      <h3>Creation</h3>
+      <ol>
+        <li>User enters plaintext in browser</li>
+        <li>
+          Browser generates AES-256-GCM key using
+          <code>crypto.subtle.generateKey()</code>
+        </li>
+        <li>
+          Browser encrypts plaintext using <code>crypto.subtle.encrypt()</code>
+        </li>
+        <li>Key is exported to base64url and embedded in URL fragment</li>
+        <li>Ciphertext + IV sent to server via POST /api/secrets</li>
+        <li>Server stores in Durable Object with TTL alarm</li>
+      </ol>
+
+      <h3>Reading</h3>
+      <ol>
+        <li>User opens link (fragment is available in browser only)</li>
+        <li>Browser requests secret from server via GET /api/secrets/:id</li>
+        <li>
+          Server returns ciphertext + IV and immediately deletes from storage
+        </li>
+        <li>Browser extracts key from fragment</li>
+        <li>Browser decrypts using <code>crypto.subtle.decrypt()</code></li>
+        <li>Plaintext displayed to user</li>
+      </ol>
+
+      <h3>Expiration</h3>
+      <ul>
+        <li>Unread secrets expire based on selected TTL (5min to 7days)</li>
+        <li>Durable Object alarm automatically deletes expired secrets</li>
+        <li>Read secrets are deleted immediately upon retrieval</li>
+        <li>No backup or recovery mechanism exists</li>
+      </ul>
+
+      <h2>Infrastructure Security</h2>
+      <h3>Cloudflare Workers</h3>
+      <ul>
+        <li class="check">Edge compute - no persistent server to compromise</li>
+        <li class="check">Isolated worker per request - no shared state</li>
+        <li class="check">Automatic DDoS protection</li>
+        <li class="check">Always-on TLS (HTTPS required)</li>
+      </ul>
+
+      <h3>Durable Objects</h3>
+      <ul>
+        <li class="check">Strongly consistent storage</li>
+        <li class="check">Automatic expiration via alarm API</li>
+        <li class="check">Transactional operations</li>
+        <li class="check">Physical isolation between objects</li>
+      </ul>
+
+      <h2>Security Headers</h2>
+      <pre><code>X-Content-Type-Options: nosniff
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
+Cross-Origin-Opener-Policy: same-origin
+Cross-Origin-Resource-Policy: same-origin
+Cross-Origin-Embedder-Policy: require-corp
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+Content-Security-Policy: default-src 'self'; ...</code></pre>
+
+      <h2>Rate Limiting</h2>
+      <p>
+        To prevent abuse, rate limiting is implemented using sharded Durable
+        Objects:
+      </p>
+      <ul>
+        <li>256 shards for horizontal scalability</li>
+        <li>IP addresses are hashed using SHA-256 for privacy</li>
+        <li>100 creates/hour and 1,000 reads/hour per IP</li>
+        <li>Rate limit data stored in RAM only (ephemeral)</li>
+      </ul>
+
+      <h2>OWASP Top 10 Compliance</h2>
+      <table>
+        <tr>
+          <th>Risk</th>
+          <th>Status</th>
+          <th>Mitigation</th>
+        </tr>
+        <tr>
+          <td>A01: Broken Access Control</td>
+          <td>✓ Protected</td>
+          <td>DO isolation + rate limiting</td>
+        </tr>
+        <tr>
+          <td>A02: Cryptographic Failures</td>
+          <td>✓ Protected</td>
+          <td>Client-side AES-256-GCM</td>
+        </tr>
+        <tr>
+          <td>A03: Injection</td>
+          <td>N/A</td>
+          <td>No SQL/dynamic queries</td>
+        </tr>
+        <tr>
+          <td>A04: Insecure Design</td>
+          <td>✓ Protected</td>
+          <td>Zero-knowledge architecture</td>
+        </tr>
+        <tr>
+          <td>A05: Security Misconfiguration</td>
+          <td>✓ Protected</td>
+          <td>Security headers + CSP</td>
+        </tr>
+        <tr>
+          <td>A06: Vulnerable Components</td>
+          <td>✓ Protected</td>
+          <td>Minimal dependencies</td>
+        </tr>
+        <tr>
+          <td>A07: Auth Failures</td>
+          <td>N/A</td>
+          <td>No auth required (anonymous)</td>
+        </tr>
+        <tr>
+          <td>A08: Data Integrity Failures</td>
+          <td>✓ Protected</td>
+          <td>AES-GCM authentication tag</td>
+        </tr>
+        <tr>
+          <td>A09: Logging Failures</td>
+          <td>✓ Protected</td>
+          <td>No sensitive data logged</td>
+        </tr>
+        <tr>
+          <td>A10: SSRF</td>
+          <td>N/A</td>
+          <td>No outbound requests</td>
+        </tr>
+      </table>
+
+      <h2>Independent Verification</h2>
+      <p>volatile.sh is open source. You can:</p>
+      <ul>
+        <li>Review the source code on GitHub</li>
+        <li>
+          Audit the encryption implementation in your browser's developer tools
+        </li>
+        <li>Inspect network requests to verify the fragment is never sent</li>
+        <li>
+          Run your own instance using the provided deployment instructions
+        </li>
+      </ul>
+
+      <h2>Responsible Disclosure</h2>
+      <p>
+        If you discover a security vulnerability, please disclose it
+        responsibly:
+      </p>
+      <ul>
+        <li>Email: security@volatile.sh</li>
+        <li>PGP key: Available on keybase.io</li>
+        <li>We will respond within 48 hours</li>
+        <li>Bug bounties may be available for critical findings</li>
+      </ul>
+
+      <p class="muted" style="margin-top: 2rem">
+        <a href="/">← Back to volatile.sh</a>
+      </p>
+    </div>
+  </body>
+</html>

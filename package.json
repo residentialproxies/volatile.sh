@@ -1,0 +1,17 @@
+{
+  "name": "volatile-sh",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "install:front": "npm --cache .npm-cache --prefix volatile.sh-front.sh install --no-audit --no-fund",
+    "build:front": "npm --cache .npm-cache --prefix volatile.sh-front.sh run build",
+    "dev": "npm run build:front && wrangler dev",
+    "deploy": "npm run build:front && wrangler deploy",
+    "tail": "wrangler tail",
+    "test": "npm run build:front && node --test",
+    "postinstall": "npm run install:front"
+  },
+  "devDependencies": {
+    "wrangler": "^3.99.0"
+  }
+}

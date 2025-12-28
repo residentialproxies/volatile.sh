@@ -1,0 +1,17 @@
+dist/
+.npm-cache/
+.wrangler/
+.mf/
+node_modules/
+volatile.sh-front.sh/node_modules/
+.DS_Store
+
+# Sensitive configuration files
+wrangler.toml
+.env
+.env.*
+!.env.example
+
+# Lock files (per hook requirements)
+package-lock.json
+volatile.sh-front.sh/package-lock.json

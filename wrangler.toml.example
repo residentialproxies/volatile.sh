@@ -1,0 +1,36 @@
+name = "volatile-sh"
+main = "src/index.js"
+compatibility_date = "2024-12-01"
+
+# Account ID should be set via environment variable CLOUDFLARE_ACCOUNT_ID
+# or copied from this example to wrangler.toml (not tracked in git)
+# account_id = "YOUR_ACCOUNT_ID_HERE"
+
+# Serve static files from /public
+[assets]
+directory = "./dist"
+
+# Durable Object binding
+[[durable_objects.bindings]]
+name = "SECRETS"
+class_name = "SecretStore"
+
+# Rate Limiter Durable Object binding
+[[durable_objects.bindings]]
+name = "RATE_LIMIT"
+class_name = "RateLimiter"
+
+# Custom domain
+routes = [
+  { pattern = "volatile.sh/*", custom_domain = true },
+  { pattern = "www.volatile.sh/*", custom_domain = true }
+]
+
+# Durable Object migration (required for first deploy)
+[[migrations]]
+tag = "v1"
+new_classes = ["SecretStore"]
+
+[[migrations]]
+tag = "v2"
+new_classes = ["RateLimiter"]

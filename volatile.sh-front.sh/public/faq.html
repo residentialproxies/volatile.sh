@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FAQ - volatile.sh</title>
+    <meta
+      name="description"
+      content="Frequently asked questions about volatile.sh - zero-knowledge secret sharing."
+    />
+    <meta name="robots" content="index,follow" />
+    <meta name="theme-color" content="#050505" />
+    <link rel="canonical" href="https://volatile.sh/faq.html" />
+    <style>
+      :root {
+        --bg: #050505;
+        --fg: #33ff00;
+        --dim: #1a8000;
+        --dimmer: #0c3d00;
+        --red: #ef4444;
+        --red-dim: #991b1b;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 1.5rem;
+        background: var(--bg);
+        color: var(--fg);
+        font-family:
+          ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        line-height: 1.7;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      header {
+        margin-bottom: 2rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid var(--dimmer);
+      }
+      h1 {
+        font-size: 1.8rem;
+        margin: 0 0 0.5rem 0;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+      }
+      .tagline {
+        font-size: 0.85rem;
+        opacity: 0.7;
+      }
+      h2 {
+        font-size: 1.1rem;
+        margin: 2rem 0 0.75rem 0;
+        padding-bottom: 0.25rem;
+        border-bottom: 1px solid var(--dimmer);
+      }
+      p,
+      li {
+        opacity: 0.9;
+        font-size: 0.95rem;
+      }
+      a {
+        color: var(--dim);
+        text-decoration: none;
+      }
+      a:hover {
+        color: var(--fg);
+        text-decoration: underline;
+      }
+      .muted {
+        color: var(--dim);
+      }
+      code {
+        color: var(--fg);
+        background: var(--dimmer);
+        padding: 0.15rem 0.4rem;
+        font-size: 0.9em;
+      }
+      .warning {
+        border-left: 3px solid var(--red);
+        padding-left: 1rem;
+        margin: 1rem 0;
+      }
+      .warning p {
+        color: var(--red);
+        margin: 0.25rem 0;
+      }
+      .nav {
+        text-align: center;
+        margin-bottom: 2rem;
+        font-size: 0.85rem;
+      }
+      .nav a {
+        margin: 0 0.5rem;
+        opacity: 0.7;
+      }
+      .nav a:hover {
+        opacity: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="nav">
+        <a href="/">[ HOME ]</a>
+        <a href="/docs.html">[ DOCS ]</a>
+        <a href="/security.html">[ SECURITY ]</a>
+        <a href="/privacy.html">[ PRIVACY ]</a>
+        <a href="/terms.html">[ TERMS ]</a>
+      </div>
+
+      <header>
+        <h1>&gt; FREQUENTLY_ASKED_QUESTIONS</h1>
+        <p class="tagline">Everything you need to know about volatile.sh</p>
+      </header>
+
+      <h2>How secure is volatile.sh?</h2>
+      <p>
+        volatile.sh uses <strong>AES-256-GCM encryption</strong>, the same
+        standard used by governments and militaries worldwide. Your secret is
+        encrypted <strong>in your browser</strong> before it ever leaves your
+        device. The decryption key is stored in the URL fragment (the part after
+        <code>#</code>), which browsers never send to servers. This means we
+        literally cannot read your secrets.
+      </p>
+
+      <h2>Can you see my secrets?</h2>
+      <p>
+        <strong>No.</strong> Zero-knowledge means we have zero knowledge of your
+        data.
+      </p>
+      <ul>
+        <li>Your secret is encrypted client-side using Web Crypto API</li>
+        <li>
+          The encryption key is in the URL fragment, never sent to our server
+        </li>
+        <li>
+          We only store encrypted ciphertext, which is useless without the key
+        </li>
+        <li>
+          Even if we were compelled by law, we could not decrypt your data
+        </li>
+      </ul>
+
+      <h2>What happens if I lose the link?</h2>
+      <p>
+        <strong>Your secret is permanently lost.</strong> The link contains the
+        decryption key. If you lose it, there is no recovery mechanism. This is
+        intentional for security.
+      </p>
+
+      <h2>Why use this instead of email/Slack?</h2>
+      <p>
+        Email and chat platforms store your messages forever on their servers.
+        They can be subpoenaed, breached, or mined for advertising. volatile.sh:
+      </p>
+      <ul>
+        <li>Stores nothing permanently (ephemeral RAM-only storage)</li>
+        <li>Destroys messages after reading (burn-after-reading)</li>
+        <li>Requires no account or personal information</li>
+        <li>Works with any recipient who has a web browser</li>
+      </ul>
+
+      <h2>Can I password-protect my secret?</h2>
+      <p>
+        The link itself acts as authentication. Anyone with the full link
+        (including the fragment) can decrypt the secret. Treat the link like the
+        secret itself. For additional security, share the link through a secure
+        channel (encrypted messaging, in person, etc.).
+      </p>
+
+      <h2>What's the maximum secret size?</h2>
+      <p>
+        Approximately <strong>1MB of text</strong> after encryption. This is
+        about 500,000 words or roughly the length of a short novel. For most use
+        cases (API keys, passwords, confidential messages), this is more than
+        sufficient.
+      </p>
+
+      <h2>Do you log anything?</h2>
+      <p>We log minimal operational data only:</p>
+      <ul>
+        <li>Rate limit counters (hashed IP addresses, stored in RAM only)</li>
+        <li>Request metrics for capacity planning</li>
+        <li>
+          <strong>We do not log:</strong> secret content, keys, or personal
+          identifiers
+        </li>
+      </ul>
+
+      <h2>Is this open source?</h2>
+      <p>
+        Yes! The source code is available on GitHub. You can review it, run your
+        own instance, or contribute. Transparency is essential for security
+        tools.
+      </p>
+
+      <h2>Can I self-host this?</h2>
+      <p>
+        Yes. volatile.sh is built on Cloudflare Workers and Durable Objects,
+        which you can deploy to your own Cloudflare account. See the
+        <a href="/docs.html">documentation</a>
+        for setup instructions.
+      </p>
+
+      <h2>What if volatile.sh shuts down?</h2>
+      <p>
+        All secrets have a maximum TTL of 7 days. Even if the service shut down
+        immediately, any unread secrets would simply expire and be deleted. Your
+        secrets are not dependent on our long-term existence.
+      </p>
+
+      <h2>How are secrets deleted?</h2>
+      <p>
+        Secrets are stored in Cloudflare Durable Objects with an automatic
+        expiration alarm. When a secret is read, it is immediately deleted from
+        the DO storage. Unread secrets are automatically deleted when their TTL
+        expires. This is enforced at the platform level and cannot be bypassed.
+      </p>
+
+      <h2>Is the decryption key really never sent to the server?</h2>
+      <p>
+        Yes. This is a fundamental property of how URLs work. The fragment
+        (everything after the <code>#</code>) is
+        <strong>never included in HTTP requests</strong>. You can verify this
+        yourself by opening your browser's developer tools and watching the
+        network requests when creating or reading a secret—the fragment is
+        nowhere to be found.
+      </p>
+
+      <div class="warning">
+        <p><strong>Security Reminders:</strong></p>
+        <p>• Anyone with the link can read the secret—share it securely</p>
+        <p>• Browser extensions or screen recorders can capture your content</p>
+        <p>
+          • Link previews in chat apps may send the URL to their servers (use
+          caution)
+        </p>
+      </div>
+
+      <p class="muted" style="margin-top: 2rem">
+        <a href="/">← Back to volatile.sh</a>
+      </p>
+    </div>
+  </body>
+</html>

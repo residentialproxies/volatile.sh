@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Privacy Policy - volatile.sh</title>
+    <meta
+      name="description"
+      content="Privacy policy for volatile.sh - zero-knowledge secret sharing service."
+    />
+    <meta name="robots" content="index,follow" />
+    <meta name="theme-color" content="#050505" />
+    <link rel="canonical" href="https://volatile.sh/privacy.html" />
+    <style>
+      :root {
+        --bg: #050505;
+        --fg: #33ff00;
+        --dim: #1a8000;
+        --dimmer: #0c3d00;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 1.5rem;
+        background: var(--bg);
+        color: var(--fg);
+        font-family:
+          ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        line-height: 1.7;
+      }
+      .container {
+        max-width: 760px;
+        margin: 0 auto;
+      }
+      header {
+        margin-bottom: 2rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid var(--dimmer);
+      }
+      h1 {
+        font-size: 1.5rem;
+        margin: 0 0 0.5rem 0;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+      }
+      .tagline {
+        font-size: 0.85rem;
+        opacity: 0.7;
+      }
+      .updated {
+        font-size: 0.75rem;
+        opacity: 0.5;
+        margin-top: 0.5rem;
+      }
+      h2 {
+        font-size: 1.1rem;
+        margin: 2rem 0 0.75rem 0;
+        padding-bottom: 0.25rem;
+        border-bottom: 1px solid var(--dimmer);
+      }
+      h3 {
+        font-size: 0.95rem;
+        margin: 1.25rem 0 0.5rem 0;
+      }
+      p,
+      li {
+        opacity: 0.9;
+        font-size: 0.92rem;
+      }
+      a {
+        color: var(--dim);
+        text-decoration: none;
+      }
+      a:hover {
+        color: var(--fg);
+        text-decoration: underline;
+      }
+      .muted {
+        color: var(--dim);
+      }
+      code {
+        color: var(--fg);
+        background: var(--dimmer);
+        padding: 0.15rem 0.4rem;
+        font-size: 0.9em;
+      }
+      ul {
+        padding-left: 1.25rem;
+      }
+      .nav {
+        text-align: center;
+        margin-bottom: 2rem;
+        font-size: 0.85rem;
+      }
+      .nav a {
+        margin: 0 0.5rem;
+        opacity: 0.7;
+      }
+      .nav a:hover {
+        opacity: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="nav">
+        <a href="/">[ HOME ]</a>
+        <a href="/faq.html">[ FAQ ]</a>
+        <a href="/docs.html">[ DOCS ]</a>
+        <a href="/security.html">[ SECURITY ]</a>
+        <a href="/terms.html">[ TERMS ]</a>
+      </div>
+
+      <header>
+        <h1>&gt; PRIVACY_POLICY</h1>
+        <p class="tagline">
+          Zero-knowledge means we have zero knowledge of your data.
+        </p>
+        <p class="updated">Last updated: December 2024</p>
+      </header>
+
+      <h2>1. Overview</h2>
+      <p>
+        volatile.sh is designed as a zero-knowledge service. This means we
+        technically cannot access your secrets because they are encrypted in
+        your browser before they reach our servers. The decryption key is stored
+        in the URL fragment (the part after <code>#</code>), which browsers
+        never send to servers.
+      </p>
+
+      <h2>2. What We Store</h2>
+      <p>We store only the following encrypted data:</p>
+      <ul>
+        <li>
+          <strong>Encrypted ciphertext</strong> - Your secret encrypted with
+          AES-256-GCM
+        </li>
+        <li>
+          <strong>Initialization Vector (IV)</strong> - 12 bytes required for
+          decryption
+        </li>
+        <li>
+          <strong>Expiration timestamp</strong> - When the secret should be
+          auto-deleted
+        </li>
+      </ul>
+      <p class="muted">
+        <strong>Important:</strong> Without the decryption key (which we never
+        have), this data is mathematically impossible to decrypt.
+      </p>
+
+      <h2>3. What We Don't Store</h2>
+      <ul>
+        <li>
+          Plaintext secrets (your secret never leaves your browser unencrypted)
+        </li>
+        <li>
+          Encryption keys (kept in the URL fragment, never sent to servers)
+        </li>
+        <li>
+          User accounts or personal identifiers (no registration required)
+        </li>
+        <li>IP addresses linked to secrets (hashed for rate limiting only)</li>
+        <li>Access logs or read receipts</li>
+      </ul>
+
+      <h2>4. Operational Data</h2>
+      <p>For service operation, we temporarily store:</p>
+      <ul>
+        <li>
+          <strong>Rate limit counters</strong> - Hashed IP addresses (SHA-256)
+          stored in RAM only
+        </li>
+        <li>
+          <strong>Request metrics</strong> - Anonymous aggregate data for
+          capacity planning
+        </li>
+      </ul>
+      <p class="muted">
+        This data is ephemeral (RAM-only), never persisted to disk, and
+        automatically deleted.
+      </p>
+
+      <h2>5. Data Retention</h2>
+      <ul>
+        <li>
+          <strong>Secrets:</strong> Automatically deleted after first read OR
+          when TTL expires (5min-7days)
+        </li>
+        <li>
+          <strong>Rate limit data:</strong> Stored for 1 hour maximum in RAM
+        </li>
+        <li>
+          <strong>No backups:</strong> Deleted secrets cannot be recovered
+        </li>
+      </ul>
+
+      <h2>6. Data Residency</h2>
+      <p>
+        volatile.sh is hosted on Cloudflare's global network. Data is stored in
+        Cloudflare Durable Objects, which replicate within geographic regions
+        for reliability. We do not control specific data center locations—this
+        is managed by Cloudflare's infrastructure.
+      </p>
+
+      <h2>7. Your Rights (GDPR/CCPA)</h2>
+      <h3>Right to Access</h3>
+      <p>
+        Due to the zero-knowledge architecture, we cannot provide access to your
+        secrets because we do not have them. Only someone with the full link
+        (including the fragment) can access a secret.
+      </p>
+
+      <h3>Right to Deletion</h3>
+      <p>
+        Secrets are automatically deleted immediately after reading or when the
+        TTL expires. There is no mechanism to request deletion because it
+        happens automatically by design.
+      </p>
+
+      <h3>Right to Portability</h3>
+      <p>
+        Not applicable. Your data is encrypted and we do not have access to it.
+        The link itself (which you control) is the only "port" needed.
+      </p>
+
+      <h3>Right to Opt-Out (CCPA)</h3>
+      <p>
+        We do not sell personal information. We have no personal information to
+        sell. The service is anonymous by design.
+      </p>
+
+      <h2>8. Children's Privacy</h2>
+      <p>
+        volatile.sh does not collect personal information from anyone. The
+        service is anonymous and requires no registration. We do not knowingly
+        target children under 13.
+      </p>
+
+      <h2>9. Cookies and Tracking</h2>
+      <p>
+        volatile.sh does not use cookies for tracking. We may use essential
+        cookies for technical functionality (e.g., Cloudflare's security
+        features). We do not use:
+      </p>
+      <ul>
+        <li>Advertising tracking</li>
+        <li>Analytics cookies</li>
+        <li>Marketing cookies</li>
+        <li>Third-party tracking scripts</li>
+      </ul>
+
+      <h2>10. Browser Security Reminders</h2>
+      <p>
+        While we protect your data on our servers, your security also depends on
+        your environment:
+      </p>
+      <ul>
+        <li>Browser extensions may access page content</li>
+        <li>Screen recording software can capture your screen</li>
+        <li>Link previews in chat apps may send URLs to external servers</li>
+        <li>Shared devices may have malware or keyloggers</li>
+      </ul>
+
+      <h2>11. Data Breaches</h2>
+      <p>
+        In the event of a server breach, the attacker would only have access to
+        encrypted ciphertext without decryption keys. AES-256-GCM is considered
+        unbreakable with current technology. However, we will notify users via
+        the website if a significant incident occurs.
+      </p>
+
+      <h2>12. Legal Demands</h2>
+      <p>If we receive a subpoena, warrant, or other legal demand:</p>
+      <ul>
+        <li>We cannot provide decrypted secrets (we don't have them)</li>
+        <li>We cannot provide access logs (we don't keep them)</li>
+        <li>We can only provide encrypted ciphertext (useless without keys)</li>
+        <li>
+          We will challenge overbroad requests to the extent permitted by law
+        </li>
+      </ul>
+
+      <h2>13. Contact</h2>
+      <p>For privacy-related inquiries:</p>
+      <ul>
+        <li>Email: privacy@volatile.sh</li>
+        <li>GitHub: Issues page for transparency</li>
+      </ul>
+      <p class="muted">
+        Please note: We cannot recover lost links or decrypt secrets. These are
+        technical limitations of the zero-knowledge architecture, not policy
+        choices.
+      </p>
+
+      <h2>14. Policy Updates</h2>
+      <p>
+        We may update this privacy policy to reflect changes in our practices or
+        for legal and regulatory reasons. Significant changes will be noted on
+        this page with an updated "Last updated" date.
+      </p>
+
+      <p class="muted" style="margin-top: 2rem">
+        <a href="/">← Back to volatile.sh</a>
+      </p>
+    </div>
+  </body>
+</html>

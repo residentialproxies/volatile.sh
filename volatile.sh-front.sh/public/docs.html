@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Documentation - volatile.sh</title>
+    <meta
+      name="description"
+      content="Technical documentation for volatile.sh - how to use, API, security details."
+    />
+    <meta name="robots" content="index,follow" />
+    <meta name="theme-color" content="#050505" />
+    <link rel="canonical" href="https://volatile.sh/docs.html" />
+    <style>
+      :root {
+        --bg: #050505;
+        --fg: #33ff00;
+        --dim: #1a8000;
+        --dimmer: #0c3d00;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 1.5rem;
+        background: var(--bg);
+        color: var(--fg);
+        font-family:
+          ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        line-height: 1.6;
+      }
+      .container {
+        max-width: 900px;
+        margin: 0 auto;
+      }
+      header {
+        margin-bottom: 2rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid var(--dimmer);
+      }
+      h1 {
+        font-size: 1.8rem;
+        margin: 0 0 0.5rem 0;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+      }
+      .tagline {
+        font-size: 0.85rem;
+        opacity: 0.7;
+      }
+      h2 {
+        font-size: 1.2rem;
+        margin: 2.5rem 0 1rem 0;
+        padding-bottom: 0.25rem;
+        border-bottom: 1px solid var(--dimmer);
+      }
+      h3 {
+        font-size: 1rem;
+        margin: 1.5rem 0 0.5rem 0;
+      }
+      p,
+      li,
+      td {
+        opacity: 0.9;
+        font-size: 0.93rem;
+      }
+      a {
+        color: var(--dim);
+        text-decoration: none;
+      }
+      a:hover {
+        color: var(--fg);
+        text-decoration: underline;
+      }
+      .muted {
+        color: var(--dim);
+      }
+      code {
+        color: var(--fg);
+        background: var(--dimmer);
+        padding: 0.15rem 0.4rem;
+        font-size: 0.9em;
+      }
+      pre {
+        background: var(--dimmer);
+        padding: 1rem;
+        overflow-x: auto;
+        border-left: 3px solid var(--fg);
+      }
+      pre code {
+        background: none;
+        padding: 0;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1rem 0;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 0.75rem;
+        border-bottom: 1px solid var(--dimmer);
+      }
+      th {
+        opacity: 1;
+        font-weight: bold;
+      }
+      .endpoint {
+        background: var(--dimmer);
+        padding: 0.5rem 1rem;
+        font-family: monospace;
+        margin: 0.5rem 0;
+      }
+      .method {
+        display: inline-block;
+        padding: 0.1rem 0.5rem;
+        margin-right: 0.5rem;
+        font-weight: bold;
+      }
+      .get {
+        background: #1a8000;
+        color: black;
+      }
+      .post {
+        background: #0080ff;
+        color: white;
+      }
+      .nav {
+        text-align: center;
+        margin-bottom: 2rem;
+        font-size: 0.85rem;
+      }
+      .nav a {
+        margin: 0 0.5rem;
+        opacity: 0.7;
+      }
+      .nav a:hover {
+        opacity: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="nav">
+        <a href="/">[ HOME ]</a>
+        <a href="/faq.html">[ FAQ ]</a>
+        <a href="/security.html">[ SECURITY ]</a>
+        <a href="/privacy.html">[ PRIVACY ]</a>
+        <a href="/terms.html">[ TERMS ]</a>
+      </div>
+
+      <header>
+        <h1>&gt; DOCUMENTATION</h1>
+        <p class="tagline">Technical guide for volatile.sh</p>
+      </header>
+
+      <h2>Quick Start</h2>
+      <ol>
+        <li>Go to <a href="/">volatile.sh</a></li>
+        <li>Type or paste your secret into the text area</li>
+        <li>Select an expiration time (5 minutes to 7 days)</li>
+        <li>Click "GENERATE LINK"</li>
+        <li>Copy the link and share it securely</li>
+        <li>The recipient opens the link to read the secret once</li>
+        <li>The secret is permanently deleted after reading</li>
+      </ol>
+
+      <h2>How It Works</h2>
+      <p>volatile.sh uses a zero-knowledge architecture:</p>
+      <ol>
+        <li>
+          <strong>Key Generation:</strong> Your browser generates a random
+          AES-256-GCM key
+        </li>
+        <li>
+          <strong>Client Encryption:</strong> Your secret is encrypted locally
+          before any data leaves your device
+        </li>
+        <li>
+          <strong>Key in Fragment:</strong> The decryption key is embedded in
+          the URL fragment (<code>#key</code>), which browsers never send to
+          servers
+        </li>
+        <li>
+          <strong>Server Storage:</strong> Only the encrypted ciphertext and IV
+          are stored on the server
+        </li>
+        <li>
+          <strong>One-Time Read:</strong> When retrieved, the secret is deleted
+          immediately
+        </li>
+      </ol>
+
+      <h2>Time-To-Live Options</h2>
+      <table>
+        <tr>
+          <th>Duration</th>
+          <th>Use Case</th>
+        </tr>
+        <tr>
+          <td>5 minutes</td>
+          <td>Quick, sensitive handoffs (passwords, codes)</td>
+        </tr>
+        <tr>
+          <td>1 hour</td>
+          <td>Same-day coordination</td>
+        </tr>
+        <tr>
+          <td>24 hours</td>
+          <td>Overnight delivery, different time zones</td>
+        </tr>
+        <tr>
+          <td>7 days</td>
+          <td>Extended collaboration</td>
+        </tr>
+      </table>
+
+      <h2>Use Cases</h2>
+      <ul>
+        <li>
+          <strong>API Keys:</strong> Share temporary access tokens securely
+        </li>
+        <li><strong>Passwords:</strong> Send initial passwords to new users</li>
+        <li>
+          <strong>Confidential Info:</strong> Share sensitive business data
+        </li>
+        <li>
+          <strong>Journalist Sources:</strong> Secure whistleblower
+          communication
+        </li>
+        <li><strong>Emergency Notes:</strong> Self-destructing messages</li>
+      </ul>
+
+      <h2>API Reference</h2>
+      <h3>Health Check</h3>
+      <div class="endpoint"><span class="method get">GET</span>/api/health</div>
+      <pre><code>Response: { "ok": true }</code></pre>
+
+      <h3>Create Secret</h3>
+      <div class="endpoint">
+        <span class="method post">POST</span>/api/secrets
+      </div>
+      <pre><code>Request Body:
+{
+  "encrypted": "base64url-encoded ciphertext",
+  "iv": "base64url-encoded IV (12 bytes)",
+  "ttl": 86400000  // Optional: milliseconds, defaults to 24 hours
+}
+
+Response:
+{
+  "id": "aB3xY9",
+  "expiresAt": 1704067200000
+}</code></pre>
+
+      <h3>Read Secret</h3>
+      <div class="endpoint">
+        <span class="method get">GET</span>/api/secrets/:id
+      </div>
+      <pre><code>Response (first read):
+{
+  "encrypted": "base64url-encoded ciphertext",
+  "iv": "base64url-encoded IV"
+}
+
+Response (already read or expired):
+{ "error": "Secret not found" }</code></pre>
+
+      <h2>Client-Side Encryption Example</h2>
+      <pre><code>// Generate a key
+const key = await crypto.subtle.generateKey(
+  { name: "AES-GCM", length: 256 },
+  true,
+  ["encrypt", "decrypt"]
+);
+
+// Encrypt your message
+const iv = crypto.getRandomValues(new Uint8Array(12));
+const encoded = new TextEncoder().encode("Your secret here");
+const ciphertext = await crypto.subtle.encrypt(
+  { name: "AES-GCM", iv },
+  key,
+  encoded
+);
+
+// Send to server (key never leaves your browser!)</code></pre>
+
+      <h2>Rate Limits</h2>
+      <p>To prevent abuse, the following rate limits apply per IP address:</p>
+      <table>
+        <tr>
+          <th>Action</th>
+          <th>Limit</th>
+          <th>Window</th>
+        </tr>
+        <tr>
+          <td>Create secret</td>
+          <td>100</td>
+          <td>1 hour</td>
+        </tr>
+        <tr>
+          <td>Read secret</td>
+          <td>1,000</td>
+          <td>1 hour</td>
+        </tr>
+      </table>
+
+      <h2>Error Codes</h2>
+      <table>
+        <tr>
+          <th>Code</th>
+          <th>Status</th>
+          <th>Description</th>
+        </tr>
+        <tr>
+          <td>MISSING_FIELDS</td>
+          <td>400</td>
+          <td>Required fields not provided</td>
+        </tr>
+        <tr>
+          <td>INVALID_ENCODING</td>
+          <td>400</td>
+          <td>Data must be base64url encoded</td>
+        </tr>
+        <tr>
+          <td>INVALID_IV_LENGTH</td>
+          <td>400</td>
+          <td>IV must be 12 bytes</td>
+        </tr>
+        <tr>
+          <td>SECRET_TOO_LARGE</td>
+          <td>413</td>
+          <td>Secret exceeds ~1MB limit</td>
+        </tr>
+        <tr>
+          <td>RATE_LIMITED</td>
+          <td>429</td>
+          <td>Too many requests</td>
+        </tr>
+        <tr>
+          <td>NOT_FOUND</td>
+          <td>404</td>
+          <td>Secret doesn't exist or was burned</td>
+        </tr>
+        <tr>
+          <td>INTERNAL_ERROR</td>
+          <td>500</td>
+          <td>Server error</td>
+        </tr>
+      </table>
+
+      <h2>Browser Requirements</h2>
+      <p>volatile.sh requires a browser that supports:</p>
+      <ul>
+        <li><strong>Web Crypto API</strong> - For client-side encryption</li>
+        <li>
+          <strong>Secure Context</strong> (HTTPS) - Required for Web Crypto
+        </li>
+        <li><strong>Modern JavaScript</strong> - ES2020+ features</li>
+      </ul>
+      <p>Supported browsers: Chrome 90+, Firefox 88+, Safari 15+, Edge 90+</p>
+
+      <h2>Self-Hosting</h2>
+      <p>volatile.sh is built on Cloudflare Workers and Durable Objects:</p>
+      <ol>
+        <li>Fork the repository on GitHub</li>
+        <li>Install dependencies: <code>npm install</code></li>
+        <li>
+          Configure <code>wrangler.toml</code> with your Cloudflare account
+        </li>
+        <li>
+          Build the frontend:
+          <code>cd volatile.sh-front.sh && npm run build</code>
+        </li>
+        <li>Deploy: <code>npx wrangler deploy</code></li>
+      </ol>
+
+      <h2>Security Best Practices</h2>
+      <ul>
+        <li>
+          Always share the full link including the fragment (everything after
+          <code>#</code>)
+        </li>
+        <li>
+          Share links through secure channels (encrypted messaging, in person)
+        </li>
+        <li>Avoid using link preview features in chat apps</li>
+        <li>Be aware that anyone with the link can decrypt the secret</li>
+        <li>
+          Consider the recipient's environment—do they have screen recording or
+          monitoring?
+        </li>
+      </ul>
+
+      <p class="muted" style="margin-top: 2rem">
+        <a href="/">← Back to volatile.sh</a> ·
+        <a href="/security.html">Security Details →</a>
+      </p>
+    </div>
+  </body>
+</html>
